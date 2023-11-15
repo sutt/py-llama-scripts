@@ -13,7 +13,7 @@ LOG_PREFIX  = '>>>> '
 def run_model(
     model_num = 1,
     iter_num = -1,
-    n_threads = 3,
+    n_threads = None,
     max_tokens = 50,
     question = 'Q: What are the three largest planets? A: ',
     model_params = {
