@@ -1,0 +1,1 @@
+python main.py -f ../wordle-qa-1/alpha/basic.md -v 1
