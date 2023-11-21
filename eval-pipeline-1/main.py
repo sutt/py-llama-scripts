@@ -4,13 +4,14 @@ from modules.parse import parse_wrapper
 from modules.oai_api import submit_prompt, get_completion
 from modules.output import output_json, output_markdown
 
+
 gen_params = {
     'max_tokens':200,
     'temperature':0.7,
 }
 
-# TODO - make more of these required, move defaults outside
-def main(
+
+def eval_sheet(
     input_md_fn: str,
     input_schema_fn: str,
     model_name: str,
@@ -25,21 +26,36 @@ def main(
         md_schema_fn=input_schema_fn,
     )
     
-    output = []
+    output = {}
+    sheet_header = [e for e in json_doc if e['type'] == 'sheet']
+    if len(sheet_header) > 0:
+        output['sheet'] = sheet_header[0]
+
+    output_questions = []
     all_questions = [q for q in json_doc if q['type'] == 'question']
+    
     if verbose_level > 0: print(f"Found {len(all_questions)} questions")
     
     for question in all_questions:
+
         try:
-            name = question['name']
-            question = [e for e in question['sub_sections'] if e['type'] == 'question'][0]['text']
+            t0 = time.time()
+            answer = None 
+            error = None
+            name = question.get('name')
+            meta = [e for e in question['sub_sections'] if e['type'] == 'meta']
+            if len(meta) > 0:
+                meta = meta[0]['data']
+            else:
+                meta = None
+            question = [
+                e for e in question['sub_sections'] 
+                if e['type'] == 'question'
+            ][0]['text']
             assert question is not None
         except Exception as e:
             print(e)
             continue
-        answer = None 
-        error = None
-        t0 = time.time()
         
         if verbose_level > 0: 
             print(f"Processing question: {name}")
@@ -54,13 +70,15 @@ def main(
                 temperature=gen_params['temperature'],
             )
             answer = get_completion(completion)
+
         except Exception as e:
             error = e
             if verbose_level > 0: 
                 print(f"error on generation: {e}")
         
-        output.append({
+        output_questions.append({
             'name': name,
+            'meta_data': meta,
             'question': question,
             'answer': answer,
             'error': error,
@@ -69,10 +87,17 @@ def main(
         })
 
         if verbose_level > 0: 
-            print(f"complete in: {time.time() - t0}")
+            print(f"complete in: {round(time.time() - t0, 1)}")
         
         if tic is not None:
             time.sleep(tic)
+
+    output['questions'] = output_questions
+
+    if verbose_level > 0:
+        num_errors = len([e for e in output_questions if e['error'] is not None])
+        print(f'completed all questions...')
+        print(f'total: {len(output_questions)}, errors: {num_errors}')
 
     if output_json_fn is not None:
         output_json(output_json_fn, output)
@@ -80,7 +105,13 @@ def main(
     if output_md_fn is not None:
         output_markdown(output_md_fn, output)
 
-    return output    
+    return output
+
+
+def collect_input_sheets(
+    sheets_dir: str,
+) -> list:
+    return []
 
 
 if __name__ == '__main__':
@@ -88,21 +119,22 @@ if __name__ == '__main__':
     argparser = argparse.ArgumentParser()
     
     # One of these two required
-    argparser.add_argument('-f', '--sheet_fn', type=str)
-    argparser.add_argument('-d', '--sheets_dir', type=str)
+    argparser.add_argument('-f', '--sheet_fn',      type=str)
+    argparser.add_argument('-d', '--sheets_dir',    type=str)
     # Optional arguments
-    argparser.add_argument('-s', '--schema_fn', type=str)
-    argparser.add_argument('-m', '--model_name', type=str)
-    argparser.add_argument('-o', '--output_dir', type=str)
-    argparser.add_argument('-j', '--output_json', type=bool, default=False)
-    argparser.add_argument('-u', '--uuid_digits', type=int, default=0)
-    argparser.add_argument('-v', '--verbose', type=int, default=0)
+    argparser.add_argument('-s', '--schema_fn',     type=str)
+    argparser.add_argument('-m', '--model_name',    type=str)
+    argparser.add_argument('-o', '--output_dir',    type=str)
+    argparser.add_argument('-j', '--output_json',   action='store_true')
+    argparser.add_argument('-u', '--uuid_digits',   type=int, default=0)
+    argparser.add_argument('-v', '--verbose',       type=int, default=0)
     
     args = argparser.parse_args()
     args = vars(args)
 
+    # add defaults / override with cli args
     if args['sheet_fn'] is None:
-        raise Exception('sheet_fn or sheets_dir required')
+        raise Exception('-f/--sheet_fn or -d/--sheets_dir arg required')
         
     sheet_fn = args['sheet_fn']
 
@@ -138,6 +170,7 @@ if __name__ == '__main__':
     tic =  1.0
     verbose_level = args['verbose']
 
+    # setup args and call eval_sheet
     main_args = {
         'input_md_fn':    sheet_fn,
         'input_schema_fn':input_schema_fn,
@@ -152,8 +185,10 @@ if __name__ == '__main__':
         print('starting eval script...')
         print(json.dumps(main_args, indent=4))
 
-    output = main(
+    output = eval_sheet(
         **main_args
     )
     
-    if verbose_level > 0: print("done")
+    if verbose_level > 0:
+        # TODO - log where the output is
+        print('script done.')

@@ -9,7 +9,7 @@ with open('/home/wsutt/.openai-key.txt', 'r') as f:
 
 def submit_prompt(
     prompt: str,
-    model_name: str = "gpt-3.5-turbo",
+    model_name: str,
     max_tokens: int = 60,
     temperature: float = 0.7,
 ) -> dict:
@@ -38,6 +38,5 @@ def get_completion(
     role: str = "ai",
 ) -> str:
 
-    # return chat_completion['choices'][0]['content']
     return chat_completion.choices[0].message.content
 

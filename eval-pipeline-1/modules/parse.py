@@ -51,20 +51,59 @@ def extract_sections(
     return sections
 
 
-def parse_main(
-    text: list, 
+def extract_meta_kv(
+    text: str,
+) -> dict:
+    d_meta = {}
+    for line in text.split('\n'):
+        try:
+            
+            ind = line.find(':')
+            if ind == -1: 
+                continue
+            
+            k = line[:ind]
+            v = line[ind+1:]
+            
+            # remove the markdown bullet point if present
+            if k.startswith(('-', ' -')):
+                k = k[k.find('-')+1:]
+                k = k.strip()
+
+            # sanitize and format as snake case
+            k = k.strip().lower().replace('  ', ' ')
+            k = k.strip().lower().replace(' ', '_')
+            k = k.strip().lower().replace('-', '_')
+
+            # TODO - does the key name need to be [fuzzy] matched to a schema?
+            # TODO - does this value need to be broken to tags
+            # TODO - does this value need to be checked as enum
+
+            v = v.strip()
+            
+            d_meta[k] = v
+
+        except Exception as e: 
+            pass
+
+    return d_meta
+
+
+def parse_markdown(
+    text: str, 
     md_schema: dict
 ) -> list:
     
-    # parse to major sections
+    # parse and extract major sections
     d_md = {obj: md_schema[obj]['md_header'] for obj in md_schema}
 
     parsed_markers = parse(text, d_md, check_name=False)
 
     major_sections = extract_sections(text, parsed_markers)
 
+    # parse and extract sub-sections
     output = []
-    # parse sub-sections
+    d_sheet_meta = None
     for section in major_sections:
         
         section_type = section['type']
@@ -77,20 +116,26 @@ def parse_main(
         
         sub_sections = extract_sections(section['text'], parsed_markers, compress=True)
 
-        # parse the meta section
-        if section_type == 'meta':
-            d_meta = {}
-            for line in section['text']:
-                try:
-                    lines = line.split('\n')
-                    k, v = lines.split(':') # TODO - handle multiple colons
-                    
-                    # TODO - strip bullett lists; but not hyphenated words
-                    d_meta[k.strip()] = v.strip()
-                except: pass
-            sub_sections['meta']['data'] = d_meta
+        # apply sub-section specific parsing
+        for sub_section in sub_sections:
             
-        # TODO - handle end character on question text parsing
+            if sub_section.get('type') == 'meta':
+                
+                if section_type == 'sheet':
+                    d_sheet_meta = extract_meta_kv(sub_section['text'])
+                    sub_section['data'] = d_sheet_meta
+                    
+                elif section_type == 'question':
+                    d_meta = extract_meta_kv(sub_section['text'])
+                    if d_sheet_meta is not None:
+                        tmp = d_sheet_meta.copy()
+                        tmp.update(d_meta)
+                        d_meta = tmp
+                    sub_section['data'] = d_meta
+                
+            if sub_section.get('type') == 'question':
+                # TODO - handle end character on question text parsing
+                pass
 
         output.append({
             'type': section_type,
@@ -102,8 +147,8 @@ def parse_main(
 
 
 def parse_wrapper(
-    fn: str  = '../wordle-qa-1/alpha/basic.md',
-    md_schema_fn: str = '../wordle-qa-1/alpha/md-schema.yaml',
+    fn: str,
+    md_schema_fn: str,
 ) -> list:
 
     with open(fn, 'r') as f:
@@ -112,5 +157,13 @@ def parse_wrapper(
     with open(md_schema_fn, 'r') as f:
         md_schema = yaml.safe_load(f)
 
-    return parse_main(text, md_schema)
+    return parse_markdown(text, md_schema)
+
+
+if __name__ == '__main__':
+    sheet_obj = parse_wrapper(
+        '../../wordle-qa-1/alpha/basic.md',
+        '../data/md-schema.yaml',
+    )
+    print(json.dumps(sheet_obj, indent=2))
     

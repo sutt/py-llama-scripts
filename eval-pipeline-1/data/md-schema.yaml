@@ -1,12 +1,43 @@
 # This is the schema for QuestionDoc v0.1 markdown<->json conversion.
+#  - draft: 11.20.23
+# 
 # This schema outlines:
 #   - which sections are major/minor
 #   - how many "#" are used in the markdown for each respective section
-#   - 
-# Major sections: sheet, question
-# `sheet` is optional, and if present, we assume only one at top of sheet
-#   - if present with a `meta` section this will apply
+#   - what are valid names for sections
 # 
+# Major sections: sheet, question
+#   - since we use sheet=1, question=2, we can distinguish when parsing
+#   - notice how major sections don't use the keyword `sheet` / `question`
+#     but will instead extract the text in these respective headers as data.
+# 
+#  + `sheet` is optional, and if present, we assume only one at top of sheet
+#    - if present with a `meta` section these properties in meta
+#      will apply to each question on the doc.
+#   
+#  + `question` there can be multiple per sheet.
+#     - each of these requires a `question` subsection
+#     - and the other subsections are optional
+#     - the properties in a question's meta section will override the 
+#       properties 
+# 
+# Minor sections: 
+#   - minor sections must use the keyword name in the header and all minor 
+#     sections have the same md_header amount
+# 
+#   + `question` - required
+#     - can use <EndChar> tag to strip trailing whitespace (NotImplementedYet)
+# 
+#   + `meta` - optional
+#     - this is for listing key/value, 
+#     - canonically listed in the markdowns as bullet points separated by colon
+# 
+#   + `templates` - optional (NotImplementedYet)
+# 
+#   + `answer`  - optional (NotImplementedYet)
+# 
+# 
+
 sheet: 
   md_header: 1
   children:
