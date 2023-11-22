@@ -1,7 +1,8 @@
 import sys
 sys.path.append('../')
-import json, time
+import os, json, time
 from modules.parse import parse_wrapper
+from main import collect_input_sheets
 
 def test_1():
     assert True
@@ -54,3 +55,16 @@ def test_meta_kv_parse_1():
 
 def test_last_char_parse_1():
     pass
+
+
+def test_collect_input_sheets_1():
+    
+    sheets_dir = './data/dir-one'
+
+    input_sheets = collect_input_sheets(
+        sheets_dir=sheets_dir,
+    )
+    
+    assert len(input_sheets) == 2
+    assert './data/dir-one/input-two.md' in input_sheets
+    assert './data/dir-one/input-one.md' in input_sheets

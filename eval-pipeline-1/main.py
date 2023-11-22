@@ -110,8 +110,20 @@ def eval_sheet(
 
 def collect_input_sheets(
     sheets_dir: str,
+    fn_keyword: Union[None, str] = 'input',
+    fn_ext: str = '.md',
+    fn_exclude_keyword: Union[None, str] = None,
 ) -> list:
-    return []
+    fns = os.listdir(sheets_dir)
+    fns = [e for e in fns if e.endswith(fn_ext)]
+    if fn_keyword is not None:
+        fns = [e for e in fns if fn_keyword in e]
+    if fn_exclude_keyword is not None:
+        fns = [e for e in fns if fn_exclude_keyword not in e]
+    if sheets_dir.endswith('/') is False:
+        sheets_dir += '/'
+    fns = [sheets_dir + e for e in fns]
+    return fns
 
 
 if __name__ == '__main__':
@@ -133,13 +145,30 @@ if __name__ == '__main__':
     args = vars(args)
 
     # add defaults / override with cli args
-    if args['sheet_fn'] is None:
-        raise Exception('-f/--sheet_fn or -d/--sheets_dir arg required')
-        
     sheet_fn = args['sheet_fn']
+    sheets_dir = args['sheets_dir']
 
-    input_dir = os.path.dirname(sheet_fn) + '/'
+    # validation
+    if sheet_fn is None and sheets_dir is None:
+        raise Exception('-f/--sheet_fn or -d/--sheets_dir arg required')
 
+    if sheet_fn is not None and sheets_dir is not None:
+        raise Exception('cant use both -f/--sheet_fn or -d/--sheets_dir args')
+        
+    if sheet_fn is not None:
+        assert os.path.isfile(sheet_fn), f'file not found: {sheet_fn}'
+        
+    if sheets_dir is not None:
+        assert os.path.isdir(sheets_dir), f'dir not found: {sheets_dir}'
+
+    if sheet_fn is not None:
+        input_dir = os.path.dirname(sheet_fn) + '/'
+    elif sheets_dir is not None:
+        input_dir = sheets_dir
+        if input_dir[-1] != '/':
+            input_dir += '/'
+
+    # defaults / cli parsing
     if args['schema_fn'] is not None:
         input_schema_fn = args['schema_fn']
     elif os.listdir(input_dir).count('md-schema.yaml') > 0:
@@ -147,7 +176,6 @@ if __name__ == '__main__':
     else:
         input_schema_fn = './data/md-schema.yaml'
 
-    
     if args['model_name']:
         model_name = args['model_name']
     else:
@@ -158,36 +186,62 @@ if __name__ == '__main__':
     else: 
         output_dir = input_dir
 
-    output_fn = f'output-{model_name}-{uuid.uuid4().hex[:args["uuid_digits"]]}'
-    
-    output_md_fn   = output_dir + output_fn + '.md'
-    
-    if args['output_json']:
-        output_json_fn = output_dir + output_fn + '.json' 
-    else:
-        output_json_fn = None
-    
     tic =  1.0
+
     verbose_level = args['verbose']
 
     # setup args and call eval_sheet
-    main_args = {
-        'input_md_fn':    sheet_fn,
+    eval_args = {
         'input_schema_fn':input_schema_fn,
         'model_name':     model_name,
-        'output_md_fn':   output_md_fn,
-        'output_json_fn': output_json_fn,
         'tic':            tic,
         'verbose_level':  verbose_level,
+        # TODO - add concat output boolean
     }
+
+    if sheets_dir is not None:
+        sheet_fns = collect_input_sheets(sheets_dir)
+    else:
+        sheet_fns = [sheet_fn]
 
     if verbose_level > 0: 
         print('starting eval script...')
-        print(json.dumps(main_args, indent=4))
+        print(json.dumps(eval_args, indent=4))
 
-    output = eval_sheet(
-        **main_args
-    )
+    for sheet_fn in sheet_fns:
+        
+        tmp_fn = sheet_fn.replace(input_dir, '')
+        tmp_fn = tmp_fn.replace('input', '')
+        tmp_fn = tmp_fn.replace('.md', '')
+
+        output_fn = f'output{tmp_fn}-{model_name}'
+        
+        if args['uuid_digits'] > 0:
+            output_fn += f'-{uuid.uuid4().hex[:args["uuid_digits"]]}'
+        
+        output_md_fn   = output_dir + output_fn + '.md'
+        
+        if args['output_json']:
+            output_json_fn = output_dir + output_fn + '.json' 
+        else:
+            output_json_fn = None
+
+        sheet_args = {
+            'input_md_fn':    sheet_fn,
+            'output_md_fn':   output_md_fn,
+            'output_json_fn': output_json_fn,
+        }
+
+        eval_args.update(sheet_args)
+
+        if verbose_level > 0: 
+            print('starting eval function...')
+            print(json.dumps(sheet_args, indent=4))
+
+        # call main function
+        output = eval_sheet(
+            **eval_args
+        )
     
     if verbose_level > 0:
         # TODO - log where the output is
