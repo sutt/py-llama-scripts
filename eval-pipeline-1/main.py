@@ -138,6 +138,7 @@ if __name__ == '__main__':
     argparser.add_argument('-m', '--model_name',    type=str)
     argparser.add_argument('-o', '--output_dir',    type=str)
     argparser.add_argument('-j', '--output_json',   action='store_true')
+    argparser.add_argument('-y', '--dry_run',       action='store_true')
     argparser.add_argument('-u', '--uuid_digits',   type=int, default=0)
     argparser.add_argument('-v', '--verbose',       type=int, default=0)
     
@@ -204,6 +205,11 @@ if __name__ == '__main__':
     else:
         sheet_fns = [sheet_fn]
 
+    if args['uuid_digits'] > 0:
+        uuid_fn = f'-{uuid.uuid4().hex[:args["uuid_digits"]]}'
+    else:
+        uuid_fn = ''
+
     if verbose_level > 0: 
         print('starting eval script...')
         print(json.dumps(eval_args, indent=4))
@@ -214,10 +220,7 @@ if __name__ == '__main__':
         tmp_fn = tmp_fn.replace('input', '')
         tmp_fn = tmp_fn.replace('.md', '')
 
-        output_fn = f'output{tmp_fn}-{model_name}'
-        
-        if args['uuid_digits'] > 0:
-            output_fn += f'-{uuid.uuid4().hex[:args["uuid_digits"]]}'
+        output_fn = f'output{tmp_fn}-{model_name}{uuid_fn}'
         
         output_md_fn   = output_dir + output_fn + '.md'
         
@@ -225,6 +228,10 @@ if __name__ == '__main__':
             output_json_fn = output_dir + output_fn + '.json' 
         else:
             output_json_fn = None
+
+        dry_run = False
+        if args['dry_run']:
+            dry_run = True
 
         sheet_args = {
             'input_md_fn':    sheet_fn,
@@ -238,11 +245,13 @@ if __name__ == '__main__':
             print('starting eval function...')
             print(json.dumps(sheet_args, indent=4))
 
+        if dry_run:
+            continue
+
         # call main function
         output = eval_sheet(
             **eval_args
         )
     
     if verbose_level > 0:
-        # TODO - log where the output is
         print('script done.')

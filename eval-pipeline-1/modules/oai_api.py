@@ -1,10 +1,15 @@
 from openai import OpenAI
 
-
-with open('/home/wsutt/.openai-key.txt', 'r') as f:
-    env_key = f.read().strip()
-    # TODO - add .env file to store API key
-    # defaults to os.environ.get("OPENAI_API_KEY")
+env_key = None
+try:
+    with open('/home/wsutt/.openai-key.txt', 'r') as f:
+        env_key = f.read().strip()
+except:
+    from dotenv import load_dotenv
+    import os
+    load_dotenv()
+    env_key = os.environ.get('OPENAI_API_KEY', None)
+    assert env_key is not None, 'no env key found'
 
 
 def submit_prompt(

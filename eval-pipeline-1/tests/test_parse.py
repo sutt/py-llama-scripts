@@ -54,7 +54,29 @@ def test_meta_kv_parse_1():
     
 
 def test_last_char_parse_1():
-    pass
+
+    doc_obj = parse_wrapper(
+        './data/input-two.md',
+        '../data/md-schema.yaml',
+    )
+    # print(json.dumps(doc_obj, indent=2))
+    # assert False
+        
+    questions = [e for e in doc_obj if e['type'] == 'question']
+
+    q0_text = [e for e in questions[0]['sub_sections'] if e['type'] == 'question'][0]['text']
+    q1_text = [e for e in questions[1]['sub_sections'] if e['type'] == 'question'][0]['text']
+    q2_text = [e for e in questions[2]['sub_sections'] if e['type'] == 'question'][0]['text']
+
+    Q0_TEXT = "Q: What did the early bird get?\nA: "
+    assert q0_text == Q0_TEXT
+    
+    Q1_TEXT = "Q: What did the early bird get?\nA: \n"
+    assert q1_text == Q1_TEXT
+    
+    Q2_TEXT = "Q: What did the early bird get?\nA: \n"
+    assert q2_text == Q2_TEXT
+
 
 
 def test_collect_input_sheets_1():

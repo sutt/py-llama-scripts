@@ -134,8 +134,10 @@ def parse_markdown(
                     sub_section['data'] = d_meta
                 
             if sub_section.get('type') == 'question':
-                # TODO - handle end character on question text parsing
-                pass
+                ENDCHAR_MD_TOKEN = '|EVAL-ENDCHAR|'  # TODO - put in config
+                endchar_ind =  sub_section['text'].find(ENDCHAR_MD_TOKEN)
+                if endchar_ind != -1:
+                    sub_section['text'] = sub_section['text'][:endchar_ind]
 
         output.append({
             'type': section_type,
@@ -162,7 +164,7 @@ def parse_wrapper(
 
 if __name__ == '__main__':
     sheet_obj = parse_wrapper(
-        '../../wordle-qa-1/alpha/basic.md',
+        '../../wordle-qa-1/alpha/input-basic.md',
         '../data/md-schema.yaml',
     )
     print(json.dumps(sheet_obj, indent=2))
