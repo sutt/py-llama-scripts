@@ -32,9 +32,12 @@ def output_markdown(output_fn: str, output: dict):
     
     with open(output_fn, 'w') as f:
         
-        sheet_name = output['sheet']['name']
-        
-        f.write(f'# {sheet_name}\n')
+        sheet = output.get('sheet')
+        if sheet is not None:
+            sheet_name = sheet.get('name')
+            run_id = sheet.get('run_id')
+            f.write(f'# {sheet_name}\n')
+            f.write(f'**Run ID:** {run_id}\n')
 
         for e in output['questions']:
             

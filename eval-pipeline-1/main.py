@@ -16,6 +16,7 @@ def eval_sheet(
     input_schema_fn: str,
     model_name: str,
     output_md_fn: str,
+    run_id: Union[None, str] = None,
     output_json_fn: Union[None, str] = None,
     tic: Union[None, float] = None,
     verbose_level: int = 0,
@@ -29,13 +30,16 @@ def eval_sheet(
     output = {}
     sheet_header = [e for e in json_doc if e['type'] == 'sheet']
     if len(sheet_header) > 0:
-        output['sheet'] = sheet_header[0]
+        header = sheet_header[0]
+        header['run_id'] = run_id
+        output['sheet'] = header
 
     output_questions = []
     all_questions = [q for q in json_doc if q['type'] == 'question']
     
     if verbose_level > 0: print(f"Found {len(all_questions)} questions")
     
+    err_counter = 0
     for question in all_questions:
 
         try:
@@ -55,6 +59,7 @@ def eval_sheet(
             assert question is not None
         except Exception as e:
             print(e)
+            err_counter += 1
             continue
         
         if verbose_level > 0: 
@@ -97,7 +102,9 @@ def eval_sheet(
     if verbose_level > 0:
         num_errors = len([e for e in output_questions if e['error'] is not None])
         print(f'completed all questions...')
-        print(f'total: {len(output_questions)}, errors: {num_errors}')
+        print(f'total completion requests: {len(output_questions)},')
+        print(f'parse_errors: {err_counter}')
+        print(f'completion_errors: {num_errors}')
 
     if output_json_fn is not None:
         output_json(output_json_fn, output)
@@ -191,28 +198,31 @@ if __name__ == '__main__':
 
     verbose_level = args['verbose']
 
+    if args['uuid_digits'] > 0:
+        run_id = uuid.uuid4().hex[:args["uuid_digits"]]
+        uuid_fn = f'-{run_id}'
+    else:
+        run_id = None
+        uuid_fn = ''
+
     # setup args and call eval_sheet
     eval_args = {
         'input_schema_fn':input_schema_fn,
         'model_name':     model_name,
         'tic':            tic,
         'verbose_level':  verbose_level,
+        'run_id':         run_id,
         # TODO - add concat output boolean
     }
+    
+    if verbose_level > 0: 
+        print('starting eval script...')
+        print(json.dumps(eval_args, indent=4))
 
     if sheets_dir is not None:
         sheet_fns = collect_input_sheets(sheets_dir)
     else:
         sheet_fns = [sheet_fn]
-
-    if args['uuid_digits'] > 0:
-        uuid_fn = f'-{uuid.uuid4().hex[:args["uuid_digits"]]}'
-    else:
-        uuid_fn = ''
-
-    if verbose_level > 0: 
-        print('starting eval script...')
-        print(json.dumps(eval_args, indent=4))
 
     for sheet_fn in sheet_fns:
         

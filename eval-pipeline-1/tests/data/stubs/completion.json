@@ -1,0 +1,24 @@
+{
+  "id": "chatcmpl-8R8TCDcmSk5pC9N9Q8OtWTKQl1Nmu",
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "\"Grazie per i muffin alla griglia.\"",
+        "role": "assistant",
+        "function_call": null,
+        "tool_calls": null
+      }
+    }
+  ],
+  "created": 1701478106,
+  "model": "gpt-3.5-turbo-0613",
+  "object": "chat.completion",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 11,
+    "prompt_tokens": 24,
+    "total_tokens": 35
+  }
+}

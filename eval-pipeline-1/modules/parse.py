@@ -164,7 +164,8 @@ def parse_wrapper(
 
 if __name__ == '__main__':
     sheet_obj = parse_wrapper(
-        '../../wordle-qa-1/alpha/input-basic.md',
+        # '../../wordle-qa-1/alpha/input-basic.md',
+        '../tests/data/input-one.md',
         '../data/md-schema.yaml',
     )
     print(json.dumps(sheet_obj, indent=2))
