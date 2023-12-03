@@ -2,6 +2,7 @@ import os, sys, time, json, argparse, uuid
 from typing import Union
 from modules.parse import parse_wrapper
 from modules.oai_api import submit_prompt, get_completion
+from modules.local_llm_api import LocalModel
 from modules.output import output_json, output_markdown
 
 
@@ -9,6 +10,36 @@ gen_params = {
     'max_tokens':200,
     'temperature':0.7,
 }
+
+def prompt_model(
+  prompt: str,
+  model_name: str,      
+):
+    error = None
+    if model_name.startswith('gpt'):
+        try:
+            completion = submit_prompt(
+                prompt=prompt,
+                model_name=model_name,
+                max_tokens=gen_params['max_tokens'],
+                temperature=gen_params['temperature'],
+            )
+            answer = get_completion(completion)
+        except Exception as e:
+            error = e
+            answer = None
+
+    else:        
+        try:
+            # TODO - cache a loaded model
+            model = LocalModel(model_name)
+            output = model(prompt)
+            answer = LocalModel.get_completion(output)
+        except Exception as e:
+            error = e
+            answer = None
+
+    return answer, error
 
 
 def eval_sheet(
@@ -66,20 +97,14 @@ def eval_sheet(
             print(f"Processing question: {name}")
         if verbose_level > 1:
             print(f"question: {question}")
-    
-        try:
-            completion = submit_prompt(
-                prompt=question,
-                model_name=model_name,
-                max_tokens=gen_params['max_tokens'],
-                temperature=gen_params['temperature'],
-            )
-            answer = get_completion(completion)
 
-        except Exception as e:
-            error = e
-            if verbose_level > 0: 
-                print(f"error on generation: {e}")
+        answer, error = prompt_model(
+            prompt=question,
+            model_name=model_name,
+        )
+        
+        if (error is not None) and (verbose_level > 0): 
+            print(f"error on generation: {error}")
         
         output_questions.append({
             'name': name,
