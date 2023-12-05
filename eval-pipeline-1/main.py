@@ -41,6 +41,45 @@ def prompt_model(
 
     return answer, error
 
+def grade_sheet(
+    json_doc: list,
+    output_obj: dict,    
+) -> list:
+    
+    all_questions = [q for q in json_doc if q['type'] == 'question']
+    
+    def extract_answer(question_obj):
+        try:
+            return [
+                e for e in question_obj['sub_sections'] 
+                if e['type'] == 'answer'
+            ][0]['answer_clean']
+        except Exception as e:
+            return None
+    
+    all_answers = [extract_answer(q) for q in all_questions]
+
+    all_completions = [e['answer'] for e in output_obj['questions']]
+    
+    # TODO - handle this better
+    assert len(all_answers) == len(all_completions)
+
+    def fuzzy_match(a, b):
+        return a.lower().strip() == b.lower().strip()
+    
+    # TODO - handle the case where completion is: 
+    #  "answer": "False. When a letter is indicated as correct..."
+
+    grades = []
+    for answer, completion in zip(all_answers, all_completions):
+        if answer is None:
+            grade = None
+        else:
+            grade = fuzzy_match(answer, completion)
+        grades.append(grade)
+
+    return grades
+
 
 def eval_sheet(
     input_md_fn: str,
@@ -49,6 +88,7 @@ def eval_sheet(
     output_md_fn: str,
     run_id: Union[None, str] = None,
     output_json_fn: Union[None, str] = None,
+    output_grade_fn: Union[None, str] = None,
     tic: Union[None, float] = None,
     verbose_level: int = 0,
 ) -> list:
@@ -130,6 +170,16 @@ def eval_sheet(
         print(f'total completion requests: {len(output_questions)},')
         print(f'parse_errors: {err_counter}')
         print(f'completion_errors: {num_errors}')
+
+    if output_grade_fn is not None:
+        try:
+            grades = grade_sheet(
+                json_doc=json_doc,
+                output_obj=output,
+            )
+            output_json(output_grade_fn, grades)
+        except Exception as e:
+            print(f'grading failed, skipping...{e}')
 
     if output_json_fn is not None:
         output_json(output_json_fn, output)
@@ -264,6 +314,8 @@ if __name__ == '__main__':
         else:
             output_json_fn = None
 
+        output_grade_fn = output_dir + f'grade{tmp_fn}-{model_name}{uuid_fn}.json'
+
         dry_run = False
         if args['dry_run']:
             dry_run = True
@@ -272,6 +324,7 @@ if __name__ == '__main__':
             'input_md_fn':    sheet_fn,
             'output_md_fn':   output_md_fn,
             'output_json_fn': output_json_fn,
+            'output_grade_fn':output_grade_fn,
         }
 
         eval_args.update(sheet_args)

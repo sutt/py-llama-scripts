@@ -139,6 +139,18 @@ def parse_markdown(
                 if endchar_ind != -1:
                     sub_section['text'] = sub_section['text'][:endchar_ind]
 
+            if sub_section.get('type') == 'answer':
+                try:
+                    sub_section['data'] = extract_meta_kv(sub_section['text'])
+                    ENDCHAR_MD_TOKEN = '|EVAL-ENDCHAR|'  # TODO - put in config
+                    answer_raw = sub_section['data']['answer']
+                    endchar_ind =  answer_raw.find(ENDCHAR_MD_TOKEN)
+                    if endchar_ind != -1:
+                        sub_section['answer_clean'] = answer_raw[:endchar_ind]
+                except Exception as e:
+                    # print(e)
+                    pass
+
         output.append({
             'type': section_type,
             'name': section['name'],
@@ -164,8 +176,9 @@ def parse_wrapper(
 
 if __name__ == '__main__':
     sheet_obj = parse_wrapper(
-        # '../../wordle-qa-1/alpha/input-basic.md',
-        '../tests/data/input-one.md',
+        # '../../wordle-qa-1/delta/input-mini.md',
+        '../../wordle-qa-1/delta/input-basic.md',
+        # '../tests/data/input-one.md',
         '../data/md-schema.yaml',
     )
     print(json.dumps(sheet_obj, indent=2))
