@@ -26,7 +26,7 @@
 #     sections have the same md_header amount
 # 
 #   + `question` - required
-#     - can use <EndChar> tag to strip trailing whitespace (NotImplementedYet)
+#     - can use |EVAL-ENDCHAR| tag to strip trailing whitespace
 # 
 #   + `meta` - optional
 #     - this is for listing key/value, 
@@ -34,8 +34,9 @@
 # 
 #   + `templates` - optional (NotImplementedYet)
 # 
-#   + `answer`  - optional (NotImplementedYet)
-# 
+#   + `answer`  - optional
+#     - this is parsed well
+#     - currently each question
 # 
 
 sheet: 
@@ -45,6 +46,7 @@ sheet:
     options:
     - meta
     - templates
+    - question
 question: 
   md_header: 2
   children:

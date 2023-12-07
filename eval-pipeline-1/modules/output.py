@@ -9,7 +9,6 @@ def wrap_md_detail(output):
 <summary>meta_data:</summary>
 
 {output}
-
 </details>
 '''
 
@@ -34,34 +33,48 @@ def output_markdown(output_fn: str, output: dict):
         
         sheet = output.get('sheet')
         if sheet is not None:
+            
             sheet_name = sheet.get('name')
             run_id = sheet.get('run_id')
+            model_name = sheet.get('model_name')
+            sheet_meta_data = sheet.get('meta_data')
+            sheet_question = sheet.get('question', 'No system prompt.')
+
             f.write(f'# {sheet_name}\n')
             f.write(f'**Run ID:** {run_id}\n')
+            f.write(f'**Model name:** {model_name}\n')
+            f.write(f'**System Prompt:**\n{sheet_question}\n')
+            f.write(f'**Meta Data:**\n')
+            f.write(f'{format_meta_data(sheet_meta_data, md_detail=False)}\n')
 
         for e in output['questions']:
             
             name = e.get('name')
-            model_name = e.get('model_name')
             question = e.get('question')
-            answer = e.get('answer')
+            completion = e.get('completion')
+            ground_truth = e.get('ground_truth')
             error = e.get('error')
-            meta_data = e.get('meta_data')
+            sheet_meta_data = e.get('meta_data')
+            grade = e.get('grade')
 
             f.write(f'### {name}\n')
 
-            if meta_data is not None:
-                f.write(f'**Meta Data:**\n{format_meta_data(meta_data)}\n')
+            if sheet_meta_data is not None:
+                f.write(f'{format_meta_data(sheet_meta_data)}\n')
             
-            f.write(f'**Model:**\n{model_name}\n')
-            
-            f.write(f'**Question:**\n{question}\n')
+            f.write(f'\n**Question:**\n{question}\n')
             
             if error is not None:
-                f.write(f'**Error:**\n{error}\n')
+                f.write(f'\n**Error:**\n{error}\n')
             
-            else:
-                f.write(f'**Answer:**\n{answer}\n')
+            if error is None:
+                f.write(f'\n**Completion:**\n{completion}\n')
+            
+            if ground_truth is not None:
+                f.write(f'\n**Ground Truth:**\n{ground_truth}\n')
+
+            if grade is not None:
+                f.write(f'\n**Grade:**\n{grade}\n')
             
             f.write('\n')
 

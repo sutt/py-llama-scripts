@@ -1,6 +1,16 @@
 import json
 import yaml
 
+ENDCHAR_MD_TOKENS = ['|EVAL-ENDCHAR|', '<EVAL-ENDCHAR>']
+
+def strip_end_token(
+        text : str,
+        endchar_tokens : list[str] = ENDCHAR_MD_TOKENS,
+) -> str:
+    endchar_ind =  max([text.find(tok) for tok in endchar_tokens])
+    if endchar_ind != -1:
+        return text[:endchar_ind]
+    return text
 
 def parse(
     text: list, 
@@ -104,6 +114,8 @@ def parse_markdown(
     # parse and extract sub-sections
     output = []
     d_sheet_meta = None
+    sheet_question = ''
+    
     for section in major_sections:
         
         section_type = section['type']
@@ -115,7 +127,7 @@ def parse_markdown(
         parsed_markers = parse(section['text'], d_md, check_name=True)
         
         sub_sections = extract_sections(section['text'], parsed_markers, compress=True)
-
+    
         # apply sub-section specific parsing
         for sub_section in sub_sections:
             
@@ -134,22 +146,19 @@ def parse_markdown(
                     sub_section['data'] = d_meta
                 
             if sub_section.get('type') == 'question':
-                ENDCHAR_MD_TOKEN = '|EVAL-ENDCHAR|'  # TODO - put in config
-                endchar_ind =  sub_section['text'].find(ENDCHAR_MD_TOKEN)
-                if endchar_ind != -1:
-                    sub_section['text'] = sub_section['text'][:endchar_ind]
 
+                if section_type == 'sheet':
+                    sheet_question = strip_end_token(sub_section['text'])
+                    
+                elif section_type == 'question':
+                    sub_section['text'] = (
+                        sheet_question + strip_end_token(sub_section['text'])
+                    )
+                    
             if sub_section.get('type') == 'answer':
-                try:
-                    sub_section['data'] = extract_meta_kv(sub_section['text'])
-                    ENDCHAR_MD_TOKEN = '|EVAL-ENDCHAR|'  # TODO - put in config
-                    answer_raw = sub_section['data']['answer']
-                    endchar_ind =  answer_raw.find(ENDCHAR_MD_TOKEN)
-                    if endchar_ind != -1:
-                        sub_section['answer_clean'] = answer_raw[:endchar_ind]
-                except Exception as e:
-                    # print(e)
-                    pass
+                sub_section['answer_clean'] = (
+                    strip_end_token(sub_section['text'])
+                )
 
         output.append({
             'type': section_type,
@@ -177,7 +186,9 @@ def parse_wrapper(
 if __name__ == '__main__':
     sheet_obj = parse_wrapper(
         # '../../wordle-qa-1/delta/input-mini.md',
-        '../../wordle-qa-1/delta/input-basic.md',
+        '../../wordle-qa-1/kappa/input-common-sense-1.md',
+        # '../tests/data/dir-two/input-one.md',
+        ''
         # '../tests/data/input-one.md',
         '../data/md-schema.yaml',
     )

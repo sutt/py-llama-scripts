@@ -59,7 +59,7 @@ def grade_sheet(
     
     all_answers = [extract_answer(q) for q in all_questions]
 
-    all_completions = [e['answer'] for e in output_obj['questions']]
+    all_completions = [e['completion'] for e in output_obj['questions']]
     
     # TODO - handle this better
     assert len(all_answers) == len(all_completions)
@@ -100,9 +100,23 @@ def eval_sheet(
     
     output = {}
     sheet_header = [e for e in json_doc if e['type'] == 'sheet']
+    
     if len(sheet_header) > 0:
+        
         header = sheet_header[0]
         header['run_id'] = run_id
+        header['model_name'] = model_name
+        meta = [e for e in header['sub_sections'] if e['type'] == 'meta']
+        if len(meta) > 0:
+            meta = meta[0]['data']
+        else:
+            meta = None
+        header['meta_data'] = meta
+        sheet_question = [e for e in header['sub_sections'] if e['type'] == 'question']
+        if len(sheet_question) > 0:
+            header['question'] = sheet_question[0]['text']
+        
+        # finally put this info into output object
         output['sheet'] = header
 
     output_questions = []
@@ -115,7 +129,7 @@ def eval_sheet(
 
         try:
             t0 = time.time()
-            answer = None 
+            completion = None 
             error = None
             name = question.get('name')
             meta = [e for e in question['sub_sections'] if e['type'] == 'meta']
@@ -123,13 +137,20 @@ def eval_sheet(
                 meta = meta[0]['data']
             else:
                 meta = None
-            question = [
+            question_text = [
                 e for e in question['sub_sections'] 
                 if e['type'] == 'question'
             ][0]['text']
             assert question is not None
+            try:
+                ground_truth = [
+                    e for e in question['sub_sections'] 
+                    if e['type'] == 'answer'
+                ][0]['answer_clean']
+            except Exception as e:
+                ground_truth = None
         except Exception as e:
-            print(e)
+            if verbose_level > 0: print(e)
             err_counter += 1
             continue
         
@@ -138,8 +159,8 @@ def eval_sheet(
         if verbose_level > 1:
             print(f"question: {question}")
 
-        answer, error = prompt_model(
-            prompt=question,
+        completion, error = prompt_model(
+            prompt=question_text,
             model_name=model_name,
         )
         
@@ -149,8 +170,9 @@ def eval_sheet(
         output_questions.append({
             'name': name,
             'meta_data': meta,
-            'question': question,
-            'answer': answer,
+            'ground_truth': ground_truth,
+            'question': question_text,
+            'completion': completion,
             'error': error,
             'model_name': model_name,
             'eval_time': time.time() - t0,
@@ -177,7 +199,13 @@ def eval_sheet(
                 json_doc=json_doc,
                 output_obj=output,
             )
+            
             output_json(output_grade_fn, grades)
+            
+            if (len(grades) > 0) and (grades.count(None) < len(grades)):
+                for output_item, grade  in zip(output['questions'], grades):
+                    output_item['grade'] = grade
+
         except Exception as e:
             print(f'grading failed, skipping...{e}')
 
