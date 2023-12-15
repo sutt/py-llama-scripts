@@ -8,11 +8,12 @@ from llama_cpp import (
 
 class LocalParams:
     max_tokens = 50
-    temperature = 0.8
+    temperature = 0.0
 
 
 class LocalModelFns:
     llama_7b = '../../data/llama-2-7b.Q4_K_M.gguf'
+    # llama_13b_chat = '../../data/llama-2-13b.Q4_K_M.gguf'
 
 
 def get_model_fn(model_name: str) -> str:
@@ -26,6 +27,13 @@ def get_model_fn(model_name: str) -> str:
     except Exception as e:
         raise ValueError(f'exception in get_model_fn: {e}')
         
+
+def wrap_prompt(prompt: str) -> str:
+    # preamble = '''In the following, answer the multiple choice question. Say nothing other than tha answer. Answer the question using the letter of the choice, a right parenthesis, and the word(s) in the answer e.g. output "C) Napolean Bonaparte". Use commonsense and traditional folk wisdom where the question calls for it.'''
+    preamble = '''In the following, answer the multiple choice question. Say nothing other than the answer. Only use the possible answers given, e.g. if the only answers are "A) True B) False", then only say either "A) True" or "B) False". Or, e.g. if the choices are A-D then only say e.g. "C) Napolean Bonaparte". Don't add any text to the beginning or end of the answer.'''
+    print(prompt)
+    return f'''[INST] <<SYS>>\n{preamble}\n<</SYS>>\n{prompt}\nA:[/INST]'''        
+
 
 # suppress logs from printing to stdout
 # there's still a little that leaks out
@@ -50,10 +58,13 @@ class LocalModel:
 
     def __call__(self, prompt):
         output = self.llm(
-            prompt=prompt, 
+            prompt=self._wrap_prompt(prompt), 
             **self.generate_params,
         )
         return output
+    
+    def _wrap_prompt(self, prompt):
+        return wrap_prompt(prompt)
     
     @staticmethod
     def get_completion(output):

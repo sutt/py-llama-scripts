@@ -32,7 +32,7 @@ def parse(
     doc_markers = [
         {
             'start': parsed_markers[i][0] + 1, 
-            'end': parsed_markers[i+1][0] - 1, 
+            'end': parsed_markers[i+1][0], 
             'obj_type': parsed_markers[i][1],
             'obj_name': parsed_markers[i][2],
         }
@@ -186,11 +186,12 @@ def parse_wrapper(
 if __name__ == '__main__':
     sheet_obj = parse_wrapper(
         # '../../wordle-qa-1/delta/input-mini.md',
-        '../../wordle-qa-1/kappa/input-common-sense-1.md',
+        # '../../wordle-qa-1/kappa/input-common-sense-1.md',
+        '../../wordle-qa-1/kappa/input-wordle-basic-1.md',
         # '../tests/data/dir-two/input-one.md',
         ''
         # '../tests/data/input-one.md',
         '../data/md-schema.yaml',
     )
-    print(json.dumps(sheet_obj, indent=2))
+    # print(json.dumps(sheet_obj, indent=2))
     
