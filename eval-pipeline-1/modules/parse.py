@@ -193,5 +193,6 @@ if __name__ == '__main__':
         # '../tests/data/input-one.md',
         '../data/md-schema.yaml',
     )
-    # print(json.dumps(sheet_obj, indent=2))
+
+    print(json.dumps(sheet_obj, indent=2))
     

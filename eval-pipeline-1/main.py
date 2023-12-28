@@ -1,6 +1,7 @@
 import os, sys, time, json, argparse, uuid
 from typing import Union
 from modules.parse import parse_wrapper
+from modules.grading import fuzzier_match
 from modules.oai_api import submit_prompt, get_completion
 from modules.local_llm_api import LocalModel
 from modules.output import output_json, output_markdown
@@ -63,22 +64,31 @@ def grade_sheet(
     
     # TODO - handle this better
     assert len(all_answers) == len(all_completions)
-
-    def fuzzy_match(a, b):
-        return a.lower().strip() == b.lower().strip()
     
-    # TODO - handle the case where completion is: 
-    #  "answer": "False. When a letter is indicated as correct..."
+    return grade_array(all_answers, all_completions, liberal_grading=False)
 
+
+def grade_array(
+        answers: list,
+        completions: list,  
+        liberal_grading: bool = False,
+) -> list:
+    
     grades = []
-    for answer, completion in zip(all_answers, all_completions):
+
+    for answer, completion in zip(answers, completions):
         if answer is None:
             grade = None
         else:
-            grade = fuzzy_match(answer, completion)
+            grade = fuzzier_match(
+                ground_truth=answer, 
+                completion=completion,
+                allow_just_letter=liberal_grading,
+            )
         grades.append(grade)
 
     return grades
+
 
 
 def eval_sheet(
