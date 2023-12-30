@@ -18,8 +18,8 @@ def do_grade_sheet(
         output_obj = json.loads(f.read())
     
     output_questions = output_obj['questions']
-    output_question_names = [e['name'] for e in output_questions]
-    output_question_grades = [e['grade'] for e in output_questions]
+    output_question_names = [e.get('name') for e in output_questions]
+    output_question_grades = [e.get('grade') for e in output_questions]
 
     # we've got an input so we'll override the ground_truth in output
     # with the ground_truth from input where applicable
