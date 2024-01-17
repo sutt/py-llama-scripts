@@ -1,0 +1,463 @@
+#### Starting FAA example (mistral-hf formatted):
+Estimated ~31 secs to cache prompt ...
+{
+  "reset": "0.00",
+  "eval_time": "19.92",
+  "save_state": "0.08"
+}
+### Saved Cache State
+## Question 0: 
+Question: What was the destination of the plane? [/INST]
+# Trial 0:
+ The original destination of Alaska Airlines Flight 1282 was Ontario, California.
+{
+  "load_state": "0.04",
+  "eval_prompt": "2.23",
+  "main_sample": "2.73"
+}
+# Trial 1:
+ The destination of the plane was Ontario, California.
+{
+  "load_state": "0.03",
+  "eval_prompt": "2.24",
+  "main_sample": "1.78"
+}
+# Trial 2:
+ The original destination of Alaska Airlines Flight 1282 was California, specifically Ontario.
+{
+  "load_state": "0.03",
+  "eval_prompt": "2.27",
+  "main_sample": "3.02"
+}
+## Question 1: 
+Question: What was the origin of the plane? [/INST]
+# Trial 0:
+ The origin of the plane was Portland, Oregon.
+{
+  "load_state": "0.03",
+  "eval_prompt": "2.10",
+  "main_sample": "1.64"
+}
+# Trial 1:
+ The origin of the plane was Portland, Oregon. However, it experienced a pressurization issue shortly after takeoff en route to Ontario, California.
+{
+  "load_state": "0.03",
+  "eval_prompt": "2.09",
+  "main_sample": "4.89"
+}
+# Trial 2:
+ The origin of the flight was Alaska Airlines Flight 1282, and the plane involved was a Boeing 737 Max 9
+{
+  "load_state": "0.03",
+  "eval_prompt": "2.09",
+  "main_sample": "4.99"
+}
+### Global Log
+llama_model_loader: loaded meta data with 24 key-value pairs and 291 tensors from ../../../../data/mistral-7b-instruct-v0.2.Q4_K_M.gguf (version GGUF V3 (latest))
+
+llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+
+llama_model_loader: - kv   0:                       general.architecture str              = llama
+
+llama_model_loader: - kv   1:                               general.name str              = mistralai_mistral-7b-instruct-v0.2
+
+llama_model_loader: - kv   2:                       llama.context_length u32              = 32768
+
+llama_model_loader: - kv   3:                     llama.embedding_length u32              = 4096
+
+llama_model_loader: - kv   4:                          llama.block_count u32              = 32
+
+llama_model_loader: - kv   5:                  llama.feed_forward_length u32              = 14336
+
+llama_model_loader: - kv   6:                 llama.rope.dimension_count u32              = 128
+
+llama_model_loader: - kv   7:                 llama.attention.head_count u32              = 32
+
+llama_model_loader: - kv   8:              llama.attention.head_count_kv u32              = 8
+
+llama_model_loader: - kv   9:     llama.attention.layer_norm_rms_epsilon f32              = 0.000010
+
+llama_model_loader: - kv  10:                       llama.rope.freq_base f32              = 1000000.000000
+
+llama_model_loader: - kv  11:                          general.file_type u32              = 15
+
+llama_model_loader: - kv  12:                       tokenizer.ggml.model str              = llama
+
+llama_model_loader: - kv  13:                      tokenizer.ggml.tokens arr[str,32000]   = ["<unk>", "<s>", "</s>", "<0x00>", "<...
+
+llama_model_loader: - kv  14:                      tokenizer.ggml.scores arr[f32,32000]   = [0.000000, 0.000000, 0.000000, 0.0000...
+
+llama_model_loader: - kv  15:                  tokenizer.ggml.token_type arr[i32,32000]   = [2, 3, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, ...
+
+llama_model_loader: - kv  16:                tokenizer.ggml.bos_token_id u32              = 1
+
+llama_model_loader: - kv  17:                tokenizer.ggml.eos_token_id u32              = 2
+
+llama_model_loader: - kv  18:            tokenizer.ggml.unknown_token_id u32              = 0
+
+llama_model_loader: - kv  19:            tokenizer.ggml.padding_token_id u32              = 0
+
+llama_model_loader: - kv  20:               tokenizer.ggml.add_bos_token bool             = true
+
+llama_model_loader: - kv  21:               tokenizer.ggml.add_eos_token bool             = false
+
+llama_model_loader: - kv  22:                    tokenizer.chat_template str              = {{ bos_token }}{% for message in mess...
+
+llama_model_loader: - kv  23:               general.quantization_version u32              = 2
+
+llama_model_loader: - type  f32:   65 tensors
+
+llama_model_loader: - type q4_K:  193 tensors
+
+llama_model_loader: - type q6_K:   33 tensors
+
+llm_load_vocab: special tokens definition check successful ( 259/32000 ).
+
+llm_load_print_meta: format           = GGUF V3 (latest)
+
+llm_load_print_meta: arch             = llama
+
+llm_load_print_meta: vocab type       = SPM
+
+llm_load_print_meta: n_vocab          = 32000
+
+llm_load_print_meta: n_merges         = 0
+
+llm_load_print_meta: n_ctx_train      = 32768
+
+llm_load_print_meta: n_embd           = 4096
+
+llm_load_print_meta: n_head           = 32
+
+llm_load_print_meta: n_head_kv        = 8
+
+llm_load_print_meta: n_layer          = 32
+
+llm_load_print_meta: n_rot            = 128
+
+llm_load_print_meta: n_embd_head_k    = 128
+
+llm_load_print_meta: n_embd_head_v    = 128
+
+llm_load_print_meta: n_gqa            = 4
+
+llm_load_print_meta: n_embd_k_gqa     = 1024
+
+llm_load_print_meta: n_embd_v_gqa     = 1024
+
+llm_load_print_meta: f_norm_eps       = 0.0e+00
+
+llm_load_print_meta: f_norm_rms_eps   = 1.0e-05
+
+llm_load_print_meta: f_clamp_kqv      = 0.0e+00
+
+llm_load_print_meta: f_max_alibi_bias = 0.0e+00
+
+llm_load_print_meta: n_ff             = 14336
+
+llm_load_print_meta: n_expert         = 0
+
+llm_load_print_meta: n_expert_used    = 0
+
+llm_load_print_meta: rope scaling     = linear
+
+llm_load_print_meta: freq_base_train  = 1000000.0
+
+llm_load_print_meta: freq_scale_train = 1
+
+llm_load_print_meta: n_yarn_orig_ctx  = 32768
+
+llm_load_print_meta: rope_finetuned   = unknown
+
+llm_load_print_meta: model type       = 7B
+
+llm_load_print_meta: model ftype      = Q4_K - Medium
+
+llm_load_print_meta: model params     = 7.24 B
+
+llm_load_print_meta: model size       = 4.07 GiB (4.83 BPW) 
+
+llm_load_print_meta: general.name     = mistralai_mistral-7b-instruct-v0.2
+
+llm_load_print_meta: BOS token        = 1 '<s>'
+
+llm_load_print_meta: EOS token        = 2 '</s>'
+
+llm_load_print_meta: UNK token        = 0 '<unk>'
+
+llm_load_print_meta: PAD token        = 0 '<unk>'
+
+llm_load_print_meta: LF token         = 13 '<0x0A>'
+
+llama_model_load: vocab only - skipping tensors
+
+llama_new_context_with_model: n_ctx      = 512
+
+llama_new_context_with_model: freq_base  = 1000000.0
+
+llama_new_context_with_model: freq_scale = 1
+
+AVX = 1 | AVX_VNNI = 0 | AVX2 = 1 | AVX512 = 1 | AVX512_VBMI = 0 | AVX512_VNNI = 0 | FMA = 1 | NEON = 0 | ARM_FMA = 0 | F16C = 1 | FP16_VA = 0 | WASM_SIMD = 0 | BLAS = 0 | SSE3 = 1 | SSSE3 = 0 | VSX = 0 | 
+
+llama_model_loader: loaded meta data with 24 key-value pairs and 291 tensors from ../../../../data/mistral-7b-instruct-v0.2.Q4_K_M.gguf (version GGUF V3 (latest))
+
+llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+
+llama_model_loader: - kv   0:                       general.architecture str              = llama
+
+llama_model_loader: - kv   1:                               general.name str              = mistralai_mistral-7b-instruct-v0.2
+
+llama_model_loader: - kv   2:                       llama.context_length u32              = 32768
+
+llama_model_loader: - kv   3:                     llama.embedding_length u32              = 4096
+
+llama_model_loader: - kv   4:                          llama.block_count u32              = 32
+
+llama_model_loader: - kv   5:                  llama.feed_forward_length u32              = 14336
+
+llama_model_loader: - kv   6:                 llama.rope.dimension_count u32              = 128
+
+llama_model_loader: - kv   7:                 llama.attention.head_count u32              = 32
+
+llama_model_loader: - kv   8:              llama.attention.head_count_kv u32              = 8
+
+llama_model_loader: - kv   9:     llama.attention.layer_norm_rms_epsilon f32              = 0.000010
+
+llama_model_loader: - kv  10:                       llama.rope.freq_base f32              = 1000000.000000
+
+llama_model_loader: - kv  11:                          general.file_type u32              = 15
+
+llama_model_loader: - kv  12:                       tokenizer.ggml.model str              = llama
+
+llama_model_loader: - kv  13:                      tokenizer.ggml.tokens arr[str,32000]   = ["<unk>", "<s>", "</s>", "<0x00>", "<...
+
+llama_model_loader: - kv  14:                      tokenizer.ggml.scores arr[f32,32000]   = [0.000000, 0.000000, 0.000000, 0.0000...
+
+llama_model_loader: - kv  15:                  tokenizer.ggml.token_type arr[i32,32000]   = [2, 3, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, ...
+
+llama_model_loader: - kv  16:                tokenizer.ggml.bos_token_id u32              = 1
+
+llama_model_loader: - kv  17:                tokenizer.ggml.eos_token_id u32              = 2
+
+llama_model_loader: - kv  18:            tokenizer.ggml.unknown_token_id u32              = 0
+
+llama_model_loader: - kv  19:            tokenizer.ggml.padding_token_id u32              = 0
+
+llama_model_loader: - kv  20:               tokenizer.ggml.add_bos_token bool             = true
+
+llama_model_loader: - kv  21:               tokenizer.ggml.add_eos_token bool             = false
+
+llama_model_loader: - kv  22:                    tokenizer.chat_template str              = {{ bos_token }}{% for message in mess...
+
+llama_model_loader: - kv  23:               general.quantization_version u32              = 2
+
+llama_model_loader: - type  f32:   65 tensors
+
+llama_model_loader: - type q4_K:  193 tensors
+
+llama_model_loader: - type q6_K:   33 tensors
+
+llm_load_vocab: special tokens definition check successful ( 259/32000 ).
+
+llm_load_print_meta: format           = GGUF V3 (latest)
+
+llm_load_print_meta: arch             = llama
+
+llm_load_print_meta: vocab type       = SPM
+
+llm_load_print_meta: n_vocab          = 32000
+
+llm_load_print_meta: n_merges         = 0
+
+llm_load_print_meta: n_ctx_train      = 32768
+
+llm_load_print_meta: n_embd           = 4096
+
+llm_load_print_meta: n_head           = 32
+
+llm_load_print_meta: n_head_kv        = 8
+
+llm_load_print_meta: n_layer          = 32
+
+llm_load_print_meta: n_rot            = 128
+
+llm_load_print_meta: n_embd_head_k    = 128
+
+llm_load_print_meta: n_embd_head_v    = 128
+
+llm_load_print_meta: n_gqa            = 4
+
+llm_load_print_meta: n_embd_k_gqa     = 1024
+
+llm_load_print_meta: n_embd_v_gqa     = 1024
+
+llm_load_print_meta: f_norm_eps       = 0.0e+00
+
+llm_load_print_meta: f_norm_rms_eps   = 1.0e-05
+
+llm_load_print_meta: f_clamp_kqv      = 0.0e+00
+
+llm_load_print_meta: f_max_alibi_bias = 0.0e+00
+
+llm_load_print_meta: n_ff             = 14336
+
+llm_load_print_meta: n_expert         = 0
+
+llm_load_print_meta: n_expert_used    = 0
+
+llm_load_print_meta: rope scaling     = linear
+
+llm_load_print_meta: freq_base_train  = 1000000.0
+
+llm_load_print_meta: freq_scale_train = 1
+
+llm_load_print_meta: n_yarn_orig_ctx  = 32768
+
+llm_load_print_meta: rope_finetuned   = unknown
+
+llm_load_print_meta: model type       = 7B
+
+llm_load_print_meta: model ftype      = Q4_K - Medium
+
+llm_load_print_meta: model params     = 7.24 B
+
+llm_load_print_meta: model size       = 4.07 GiB (4.83 BPW) 
+
+llm_load_print_meta: general.name     = mistralai_mistral-7b-instruct-v0.2
+
+llm_load_print_meta: BOS token        = 1 '<s>'
+
+llm_load_print_meta: EOS token        = 2 '</s>'
+
+llm_load_print_meta: UNK token        = 0 '<unk>'
+
+llm_load_print_meta: PAD token        = 0 '<unk>'
+
+llm_load_print_meta: LF token         = 13 '<0x0A>'
+
+llm_load_tensors: ggml ctx size =    0.11 MiB
+
+llm_load_tensors: offloading 0 repeating layers to GPU
+
+llm_load_tensors: offloaded 0/33 layers to GPU
+
+llm_load_tensors:        CPU buffer size =  4165.37 MiB
+
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+
+
+llama_new_context_with_model: n_ctx      = 512
+
+llama_new_context_with_model: freq_base  = 1000000.0
+
+llama_new_context_with_model: freq_scale = 1
+
+llama_kv_cache_init:        CPU KV buffer size =    64.00 MiB
+
+llama_new_context_with_model: KV self size  =   64.00 MiB, K (f16):   32.00 MiB, V (f16):   32.00 MiB
+
+llama_new_context_with_model: graph splits (measure): 1
+
+llama_new_context_with_model:        CPU compute buffer size =    73.00 MiB
+
+Llama.save_state: saving llama state
+Llama.save_state: got state size: 132710500
+Llama.save_state: allocated state
+Llama.save_state: copied llama state: 48201044
+Llama.save_state: saving 48201044 bytes of llama state
+
+Done

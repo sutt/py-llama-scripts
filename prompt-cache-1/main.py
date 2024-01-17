@@ -10,13 +10,14 @@ from utils import (
     ProfileStats,
 )
 
-model_path = '../../data/llama-2-7b.Q4_K_M.gguf'
+# model_path = '../../../alpha-app/data/llama-2-7b.Q4_K_M.gguf'
+model_path = '../../../../data/mistral-7b-instruct-v0.2.Q4_K_M.gguf'
 
 # default example
-default_prompt = """The mouse's name is David and is 12 years old."""
+default_prompt = """<s>[INST] The mouse's name is David and is 12 years old."""
 default_questions = [
-    "Question: What is the mouse's name? Answer:",
-    "Question: How old is the mouse? Answer:",
+    "Question: What is the mouse's name? [/INST]",
+    "Question: How old is the mouse? [/INST]",
 ]
 
 # globals used for these methods within the functions
@@ -121,40 +122,40 @@ def warmup_msg(text:str) -> None:
     
 
 if __name__ == '__main__':
-    
-    # Small example: default prompt/question
-    prompt = default_prompt
-    questions = default_questions
-    params_llm_sample = {'temp': 1.0}
-    print('#### Starting default example:')
-    warmup_msg(prompt)
-    main(
-        prompt,
-        questions,
-        n_tries=1, 
-        max_tokens=10,
-        seed=None,
-        verbose=1,
-    )
+
+    # # Small example: default prompt/question
+    # prompt = default_prompt
+    # questions = default_questions
+    # params_llm_sample = {'temp': 1.0}
+    # print('#### Starting default example:')
+    # warmup_msg(prompt)
+    # main(
+    #     prompt,
+    #     questions,
+    #     n_tries=1, 
+    #     max_tokens=10,
+    #     seed=None,
+    #     verbose=1,
+    # )
 
     # import sys
     # sys.exit(0)
 
     # Larger example: FAA questions
-    data_fn = './data/faa.json'
+    data_fn = './data/faa-mistral.json'
     data = json.load(open(data_fn, 'r'))
     prompt = data['prompt']
     questions = data['questions']
-    params_llm_sample = {'temp': 1.0}
-    print('#### Starting FAA example:')
+    params_llm_sample = {'temp': 0.0}
+    print('#### Starting FAA example (mistral-hf formatted):')
     warmup_msg(prompt)
     main(
         prompt,
         questions,
-        n_tries=2, 
+        n_tries=3, 
         max_tokens=30,
         seed=None,
-        verbose=1,
+        verbose=2,
     )
     
     print('Done')

@@ -13,10 +13,10 @@ prompt_questions_model = {
 
 # change these variables, including
 input_fn = './faa.txt'
-output_fn = './faa.json'
+output_fn = './faa-mistral.json'
 questions = [
-    '''What was the destination of the plane? Answer:''',
-    '''What was the origin of the plane? Answer:''',
+    '''\nQuestion: What was the destination of the plane? [/INST]''',
+    '''\nQuestion: What was the origin of the plane? [/INST]''',
 ]
 
 with open (input_fn, 'r') as f:
