@@ -1,4 +1,6 @@
 import json
+import time
+import pickle
 from typing import (
     Dict,
     List,
@@ -43,6 +45,7 @@ def question_cached_state(
         max_tokens:int=10,
         seed:int=None,
         verbose:int=1,
+        suppress_stats:bool=False,
     ) -> None:
     profile = ProfileStats()
     # Setup Section
@@ -66,7 +69,7 @@ def question_cached_state(
         token = llm.sample()
     profile.add('main_sample', num_tokens=counter)
     print('\n')  # finish the flush
-    print(profile.fmt_grid() + '\n')
+    if not(suppress_stats): print(profile.fmt_grid() + '\n')
 
 @suppress_stderr
 def create_state(
@@ -83,6 +86,29 @@ def create_state(
     state = llm.save_state()
     profile.add('save_state')
     if verbose: print('\n' + profile.fmt_grid() + '\n')
+    return state
+
+@suppress_stderr
+def load_base_apply_current(
+        llm:Llama,
+        base_fn:str,
+        current_info:str,
+        verbose:bool=True,
+    ) -> LlamaState:
+    '''
+    Load base state from disk, apply current info, return state obj
+    '''
+    t0 = time.time()
+    llm.reset()
+    with open(base_fn, 'rb') as f:
+        llm.load_state(pickle.load(f))
+    if verbose: print(f'Loaded base_states from disk: {time.time()-t0:.2f}')
+    # eval current on top of base_state, save to states obj
+    t0 = time.time()
+    current_tokenized = llm.tokenize(current_info.encode())
+    _ = llm.eval(current_tokenized)
+    state = llm.save_state()
+    if verbose: print(f'Eval current info: {time.time()-t0:.2f}')
     return state
 
 # main demonstration functions ---------
@@ -145,6 +171,54 @@ def many_state_many_questions(
             verbose=verbose,
         )
     
+def current_state_updating(
+    base_state_fns:Dict[str, str],
+    questions:List[Dict[str, str]],
+    current_prompts:Dict[str, str],
+    max_tokens:int=30,
+    seed:int=None,
+    verbose:bool=True,
+    ) -> None:
+    
+    llm = Llama(
+        model_path=model_path, 
+    )
+    
+    states = {}
+
+    # iterate over all current prompts
+    for current_key in current_prompts.keys():
+
+        print(f'### Current Key: {current_key}')
+        current_info = current_prompts[current_key]
+        print('------' + current_info + '\n------')
+        current_info += "\n\nCustomer message:"
+        
+        # update in-mem states with current info
+        for k,fn in base_state_fns.items():
+            states[k] = load_base_apply_current(
+                llm,
+                fn,
+                current_info,
+                verbose=verbose,
+            )
+        print('------\n')
+
+        # run questions at this current state
+        for q in questions:
+            print(f'## ID: {q.get("id")} | Question: {q.get("message")}')
+            question_cached_state(
+                llm,
+                states.get(q.get('id')),
+                q.get('message'),
+                max_tokens=max_tokens,
+                seed=seed,
+                verbose=verbose,
+                suppress_stats=True,  # toggle for profiling logs
+            )
+
+
+    pass
 
 # scripting ------
 
@@ -161,7 +235,79 @@ def wrap_instruct(text:str, obj:str='prompt') -> str:
     elif obj == 'question':
         return f'{text} [/INST]'
     return text
+
+# experiments ------
+
+@suppress_stderr
+def experiment_3() -> None:
     
+    # food2 example: restaurants A & B with incoming messages
+    #                and updating current_info into cached state
+    print('#### Starting food2 example (updating current_info):')
+    
+    b_overwrite_cache = False
+    base_prompt_a_fn = './data/food2-prompt-a.txt'
+    base_prompt_b_fn = './data/food2-prompt-b.txt'
+    questions_fn = './data/food2-questions.json'
+    state_fn_a = './saved_states/food2/state-a.pickle'
+    state_fn_b = './saved_states/food2/state-b.pickle'
+    
+    current_prompts = {
+        '3pm': '''\n - It is currently 3pm on Monday.\n - All Items are available currently''',
+        '6pm': '''\n - It is currently 6pm on Monday.\n - Blue cheese is not available currently''',
+        '10pm': '''\n - It is currently 10pm on Monday.\n - All Items are available currently''',
+        # try concept of "86th" item
+    }
+    
+    base_state_fns = {
+        'a': state_fn_a,
+        'b': state_fn_b,
+    }
+
+    questions = json.load(open(questions_fn, 'r'))
+    
+    questions = [
+        {
+            'id': q.get('id'),
+            'message': wrap_instruct(q.get('message'), obj='question'),
+        }
+        for q in questions
+    ]
+
+    # current_state_updating will load these states from disk
+    # no need to create them if they exist on most recent base_prompt
+    if b_overwrite_cache:
+        print('#### Creating new cache states')
+        prompt_a = open(base_prompt_a_fn, 'r').read()
+        prompt_b = open(base_prompt_b_fn, 'r').read()
+        verbose = 1
+        warmup_msg(prompt_a + prompt_b)
+        llm = Llama(model_path)
+        llm_state = create_state(
+                        llm, 
+                        wrap_instruct(prompt_a, obj='prompt'), 
+                        verbose=verbose)
+        with open(state_fn_a, 'wb') as f:
+            pickle.dump(llm_state, f)
+        llm = Llama(model_path)
+        llm_state = create_state(
+                        llm, 
+                        wrap_instruct(prompt_b, obj='prompt'), 
+                        verbose=verbose)
+        with open(state_fn_b, 'wb') as f:
+            pickle.dump(llm_state, f)
+
+    current_state_updating(
+        base_state_fns,
+        questions,
+        current_prompts,
+        max_tokens=60,
+        seed=None,
+        verbose=1,
+    )
+
+    print('#### Starting food example:')
+
 def experiment_2() -> None:
     
     # food example: restaurants A & B with incoming messages
@@ -236,6 +382,8 @@ def experiment_1() -> None:
 
 if __name__ == '__main__':
 
-    experiment_2()
+    # experiment_1()
+    # experiment_2()
+    experiment_3()
 
     print('Done')

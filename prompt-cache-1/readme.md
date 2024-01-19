@@ -52,6 +52,8 @@ main_sample  1.40         10.00        3.06
 
   - You could fine-tune in abbreviations and reasoning agents e.g. ItemLookup(exactMatch) but in minifed-javascript form. 
 
+  - You can use RAG to do "reasonable accomodations" where someone asks e.g. "can i get tomatoes on the hamburger" in previous requests and a human in-the-loop approved it, you can save that answer, and subsequently surface it with RAG for the long tail of requests.
+
 ### Todos
 
 ```markdown
@@ -112,11 +114,18 @@ main_sample  1.40         10.00        3.06
 
 [x] add write save_state to disk
     - what is r/w perf on this?
-[ ] add the updating of current information
+    ->68MB with mistral_7B_Q4
 
+[x] add the updating of current information
+[x] create output example for experiment 2 and 3
+
+[ ] add a script (not notebook) of r/w state to disk:
+    - like state-write-a.ipynb but with asserts
+    - this will help bisect any problems here with version / hardware
 [ ] full json mode
     - refactor `verbose` to streaming real-time mode
     - add full_log class (defined in utils) which is called main helper functions
+    [ ] refactor key names in script
 
 [ ] compare benchamrks of 
     - 0.2.19 vs 0.2.26
