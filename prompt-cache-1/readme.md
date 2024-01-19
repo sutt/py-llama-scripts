@@ -16,7 +16,6 @@ As can be seen the `eval_prompt` is about two orders of magnitude faster than th
 
 See [output](./output/) directory for more examples. These were created with a low-perf / no-gpu machine, but the relative times should scale up with better hardware.
 
-```
 
 ```
 #### Starting FAA example (mistral-hf formatted):
@@ -48,6 +47,10 @@ main_sample  1.40         10.00        3.06
 
   - NLP microservices pipelines:
     - example: a) extract all employers b) normalize each employer candidate to a canonical form.
+
+  - How could you generate arbitrary evals? Something like generating different queries automatically and asking different models to produce an answer, or different seeds and see if there's any discrepencies on this. Produce a an implication question, e.g. since we're out of cheese pizza i should not add this an item to any orders, correct? is this jsut today or forever? etc.
+
+  - You could fine-tune in abbreviations and reasoning agents e.g. ItemLookup(exactMatch) but in minifed-javascript form. 
 
 ### Todos
 
@@ -103,7 +106,13 @@ main_sample  1.40         10.00        3.06
     - completion time depends on length
 [x] refactor main() -> one_prompt_multi_questions()
 [~] json print rounded floats
-[ ] add new method multi_prompt_multi_questions() example
+[x] add new method multi_prompt_multi_questions() example
+[x] add utility to tokenize the prompt
+[x] expand the prompt/question eval framework
+
+[x] add write save_state to disk
+    - what is r/w perf on this?
+[ ] add the updating of current information
 
 [ ] full json mode
     - refactor `verbose` to streaming real-time mode

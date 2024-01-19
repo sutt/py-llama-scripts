@@ -1,0 +1,26 @@
+[
+    {
+        "id": "a",
+        "message": "Can i get delivery right now?"
+    },
+    {
+        "id": "b",
+        "message": "Can i get delivery right now?"
+    },
+    {
+        "id": "a",
+        "message": "What size pizza do you have?"
+    },
+    {
+        "id": "b",
+        "message": "What size pizza do you have?"
+    },
+    {
+        "id": "a",
+        "message": "Do you have anything with noodles?"
+    },
+    {
+        "id": "b",
+        "message": "Do you have anything with noodles?"
+    }
+]

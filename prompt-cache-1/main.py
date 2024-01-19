@@ -1,4 +1,8 @@
 import json
+from typing import (
+    Dict,
+    List,
+)
 from llama_cpp import (
     Llama,
     LlamaState,
@@ -68,6 +72,7 @@ def question_cached_state(
 def create_state(
         llm:Llama, 
         prefix:str,
+        verbose:int=1,
     ) -> LlamaState:
     profile = ProfileStats()
     llm.reset()
@@ -77,7 +82,7 @@ def create_state(
     profile.add('eval_time', num_tokens=len(prefix_tokenized))
     state = llm.save_state()
     profile.add('save_state')
-    print('\n' + profile.fmt_grid() + '\n')
+    if verbose: print('\n' + profile.fmt_grid() + '\n')
     return state
 
 # main demonstration functions ---------
@@ -85,7 +90,7 @@ def create_state(
 @suppress_stderr
 def one_state_many_questions(
     prompt:str,
-    questions:list,
+    questions:List[str],
     n_tries:int=1,
     max_tokens:int=30,
     seed:int=None,
@@ -115,6 +120,32 @@ def one_state_many_questions(
         print(f'### Global Log\n{log_text}')
     return
     
+
+@suppress_stderr
+def many_state_many_questions(
+    assistants:Dict[str, str],  # <resturant-id>,<prompt>
+    questions:List[Dict[str, str]],
+    max_tokens:int=30,
+    verbose:int=1,
+    ) -> None:
+    llm = Llama(
+        model_path=model_path, 
+    )
+    states = {
+        k: create_state(llm, v, verbose=1)
+        for k,v in assistants.items()
+    }
+    for question in questions:
+        print(f'## Question: {question}')
+        question_cached_state(
+            llm,
+            states.get(question.get('id')),
+            question.get('message'),
+            max_tokens=max_tokens,
+            verbose=verbose,
+        )
+    
+
 # scripting ------
 
 def warmup_msg(text:str) -> None:
@@ -123,9 +154,49 @@ def warmup_msg(text:str) -> None:
     warmup_secs = int(num_tokens / estimate_tok_per_sec)
     msg = f'Estimated ~{warmup_secs} secs to cache prompt ...'
     print(msg)
-    
 
-if __name__ == '__main__':
+def wrap_instruct(text:str, obj:str='prompt') -> str:
+    if obj == 'prompt':
+        return f'<s>[INST] {text}'
+    elif obj == 'question':
+        return f'{text} [/INST]'
+    return text
+    
+def experiment_2() -> None:
+    
+    # food example: restaurants A & B with incoming messages
+    prompt_a_fn = './data/food-prompt-a.txt'
+    prompt_b_fn = './data/food-prompt-b.txt'
+    questions_fn = './data/food-questions.json'
+    params_llm_sample = {'temp': 0.0}
+    
+    prompt_a = open(prompt_a_fn, 'r').read()
+    prompt_b = open(prompt_b_fn, 'r').read()
+    questions = json.load(open(questions_fn, 'r'))
+    
+    assistants = {
+        'a': wrap_instruct(prompt_a, obj='prompt'),
+        'b': wrap_instruct(prompt_b, obj='prompt'),
+    }
+    questions = [
+        {
+            'id': q.get('id'),
+            'message': wrap_instruct(q.get('message'), obj='question'),
+        }
+        for q in questions
+    ]
+
+    print('#### Starting food example:')
+    warmup_msg(prompt_a + prompt_b)
+
+    many_state_many_questions(
+        assistants,
+        questions,
+        max_tokens=60,
+        verbose=1,
+    )
+
+def experiment_1() -> None:
 
     # # Small example: default prompt/question
     prompt = default_prompt
@@ -161,5 +232,10 @@ if __name__ == '__main__':
         seed=None,
         verbose=1,
     )
-    
+
+
+if __name__ == '__main__':
+
+    experiment_2()
+
     print('Done')
