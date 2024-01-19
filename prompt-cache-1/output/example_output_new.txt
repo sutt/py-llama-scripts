@@ -1,0 +1,105 @@
+#### Starting default example:
+Estimated ~3 secs to cache prompt ...
+
+key          time         num_tokens   tps          
+reset        0.00         n/a          n/a          
+eval_time    2.23         22.00        9.85         
+save_state   0.07         n/a          n/a          
+
+### Saved Cache State
+## Question 0: Question: What is the mouse's name? [/INST]
+# Trial 0:
+ The given information states that the mouse's name
+
+key          time         num_tokens   tps          
+load_state   0.02         n/a          n/a          
+eval_prompt  1.93         37.00        18.93        
+main_sample  1.72         10.00        2.72         
+
+# Trial 1:
+ The name of the mouse is David.
+
+key          time         num_tokens   tps          
+load_state   0.02         n/a          n/a          
+eval_prompt  2.01         37.00        18.19        
+main_sample  1.17         8.00         2.50         
+
+## Question 1: Question: How old is the mouse? [/INST]
+# Trial 0:
+ The mouse named David is 12 years old
+
+key          time         num_tokens   tps          
+load_state   0.02         n/a          n/a          
+eval_prompt  1.48         35.00        23.39        
+main_sample  1.31         10.00        3.56         
+
+# Trial 1:
+ The mouse is 12 years old.
+
+key          time         num_tokens   tps          
+load_state   0.02         n/a          n/a          
+eval_prompt  1.70         35.00        20.37        
+main_sample  1.38         9.00         2.90         
+
+#### Starting FAA example (mistral-hf formatted):
+Estimated ~31 secs to cache prompt ...
+
+key          time         num_tokens   tps          
+reset        0.00         n/a          n/a          
+eval_time    21.13        186.00       8.80         
+save_state   0.08         n/a          n/a          
+
+### Saved Cache State
+## Question 0: 
+Question: What was the destination of the plane? [/INST]
+# Trial 0:
+ The destination of the plane was Ontario, California.
+
+key          time         num_tokens   tps          
+load_state   0.04         n/a          n/a          
+eval_prompt  1.83         203.00       108.64       
+main_sample  1.40         10.00        3.06         
+
+# Trial 1:
+ The original destination of Alaska Airlines Flight 1282 was Ontario, California.
+
+key          time         num_tokens   tps          
+load_state   0.04         n/a          n/a          
+eval_prompt  1.86         203.00       107.29       
+main_sample  2.52         17.00        3.86         
+
+# Trial 2:
+ The destination of the plane was Ontario, California.
+
+key          time         num_tokens   tps          
+load_state   0.03         n/a          n/a          
+eval_prompt  1.67         203.00       119.04       
+main_sample  1.38         10.00        3.24         
+
+## Question 1: 
+Question: What was the origin of the plane? [/INST]
+# Trial 0:
+ The origin of the plane was Portland, Oregon before it took off and experienced a pressurization issue that required it to return to Portland for an emergency
+
+key          time         num_tokens   tps          
+load_state   0.03         n/a          n/a          
+eval_prompt  1.79         203.00       111.31       
+main_sample  4.60         30.00        4.67         
+
+# Trial 1:
+ The plane, an Alaska Airlines Boeing 737 Max 9, took off from Portland, Oregon before the pressurization issue occurred.
+
+key          time         num_tokens   tps          
+load_state   0.03         n/a          n/a          
+eval_prompt  1.90         203.00       104.80       
+main_sample  5.20         30.00        4.21         
+
+# Trial 2:
+ The origin of the plane was Portland, Oregon before it encountered a pressurization issue and returned to Portland for an emergency landing.
+
+key          time         num_tokens   tps          
+load_state   0.03         n/a          n/a          
+eval_prompt  2.25         203.00       88.70        
+main_sample  4.39         26.00        3.89         
+
+Done

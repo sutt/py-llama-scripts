@@ -8,6 +8,36 @@ For example, let's say you have two different restuarants A and B that you are s
 
 Or you could have a micro-service pipeline of NLP services that are specialized via an engineered prompt.
 
+### Benchmarking
+
+The script will printout logs of the time taken to complete each step of the prompt.
+
+As can be seen the `eval_prompt` is about two orders of magnitude faster than the `main_sample` step. This is because the prompt caching of the original `eval_time` in the save_state step.
+
+See [output](./output/) directory for more examples. These were created with a low-perf / no-gpu machine, but the relative times should scale up with better hardware.
+
+```
+
+```
+#### Starting FAA example (mistral-hf formatted):
+Estimated ~31 secs to cache prompt ...
+
+key          time         num_tokens   tps          
+reset        0.00         n/a          n/a          
+eval_time    21.13        186.00       8.80         
+save_state   0.08         n/a          n/a          
+
+### Saved Cache State
+## Question 0: 
+Question: What was the destination of the plane? [/INST]
+# Trial 0:
+ The destination of the plane was Ontario, California.
+
+key          time         num_tokens   tps          
+load_state   0.04         n/a          n/a          
+eval_prompt  1.83         203.00       108.64       
+main_sample  1.40         10.00        3.06      
+```
 
 #### Misc Brainstorming:
 
@@ -66,13 +96,18 @@ Or you could have a micro-service pipeline of NLP services that are specialized 
     [x] add to prompt-cache-1
     
 [x] move models: llms/pkgs/alpha-app/data/ -> llms/data/
-[ ] create output with mistral-instruct
+[x] create output with mistral-instruct
+[x] move around readme's
 
-[ ] add llm stats / token length stats to ProfileStats
+[x] add llm stats / token length stats to ProfileStats
     - completion time depends on length
-[ ] refactor main() -> one_prompt_multi_questions()
+[x] refactor main() -> one_prompt_multi_questions()
+[~] json print rounded floats
 [ ] add new method multi_prompt_multi_questions() example
-[ ] json print rounded floats
+
+[ ] full json mode
+    - refactor `verbose` to streaming real-time mode
+    - add full_log class (defined in utils) which is called main helper functions
 
 [ ] compare benchamrks of 
     - 0.2.19 vs 0.2.26

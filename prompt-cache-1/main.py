@@ -28,6 +28,8 @@ params_llm_sample = {
     'temp': 0.0,
 }
 
+full_log = {}
+
 # main building block functions ------
 
 def question_cached_state(
@@ -44,22 +46,23 @@ def question_cached_state(
     profile.add('load_state')
     tokens_question = llm.tokenize((question_text).encode())
     llm.eval(tokens_question)
-    profile.add('eval_prompt')
+    profile.add('eval_prompt', llm=llm)
     # Seed (if set) must be after eval
     if seed is not None: llm.set_seed(seed)
     # Completion Section
     counter = 0
     token = llm.sample(**params_llm_sample)
     while token is not llm.token_eos() :
+        if counter >= max_tokens: break
         counter += 1
-        if counter > max_tokens: break
         if verbose > 0:
             print(llm.detokenize([token]).decode(), 
                   end='', flush=True)
         llm.eval([token])
         token = llm.sample()
-    profile.add('main_sample')
-    print('\n' + profile.dumps())
+    profile.add('main_sample', num_tokens=counter)
+    print('\n')  # finish the flush
+    print(profile.fmt_grid() + '\n')
 
 @suppress_stderr
 def create_state(
@@ -69,17 +72,18 @@ def create_state(
     profile = ProfileStats()
     llm.reset()
     profile.add('reset')
-    _ = llm.eval(llm.tokenize(prefix.encode()))
-    profile.add('eval_time')
+    prefix_tokenized = llm.tokenize(prefix.encode())
+    _ = llm.eval(prefix_tokenized)
+    profile.add('eval_time', num_tokens=len(prefix_tokenized))
     state = llm.save_state()
     profile.add('save_state')
-    print(profile.dumps())
+    print('\n' + profile.fmt_grid() + '\n')
     return state
 
 # main demonstration functions ---------
 
 @suppress_stderr
-def main(
+def one_state_many_questions(
     prompt:str,
     questions:list,
     n_tries:int=1,
@@ -124,19 +128,19 @@ def warmup_msg(text:str) -> None:
 if __name__ == '__main__':
 
     # # Small example: default prompt/question
-    # prompt = default_prompt
-    # questions = default_questions
-    # params_llm_sample = {'temp': 1.0}
-    # print('#### Starting default example:')
-    # warmup_msg(prompt)
-    # main(
-    #     prompt,
-    #     questions,
-    #     n_tries=1, 
-    #     max_tokens=10,
-    #     seed=None,
-    #     verbose=1,
-    # )
+    prompt = default_prompt
+    questions = default_questions
+    params_llm_sample = {'temp': 1.0}
+    print('#### Starting default example:')
+    warmup_msg(prompt)
+    one_state_many_questions(
+        prompt,
+        questions,
+        n_tries=2,
+        max_tokens=10,
+        seed=None,
+        verbose=1,
+    )
 
     # import sys
     # sys.exit(0)
@@ -149,13 +153,13 @@ if __name__ == '__main__':
     params_llm_sample = {'temp': 0.0}
     print('#### Starting FAA example (mistral-hf formatted):')
     warmup_msg(prompt)
-    main(
+    one_state_many_questions(
         prompt,
         questions,
         n_tries=3, 
         max_tokens=30,
         seed=None,
-        verbose=2,
+        verbose=1,
     )
     
     print('Done')
